@@ -41,8 +41,9 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.cardview)
     implementation(libs.retrofit)
-    implementation(libs.retrofit.converter-gson)
+    implementation(libs.retrofit.converter.gson)
     implementation(libs.glide)
     
     testImplementation(libs.junit)
