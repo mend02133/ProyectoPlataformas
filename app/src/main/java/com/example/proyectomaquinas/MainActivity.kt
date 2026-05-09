@@ -1,13 +1,17 @@
 package com.example.proyectomaquinas
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.util.Locale
-
-
 
 class MainActivity : AppCompatActivity() {
     private lateinit var rvProductos: RecyclerView
@@ -18,32 +22,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
         rvProductos = findViewById(R.id.rvProducts)
         val searchView = findViewById<SearchView>(R.id.mainSearchView)
-
-
-        // Las URLs son ejemplos de productos reales para que se vea mejor
-        listaOriginal.add(Producto("Papas Sabritas", "Facultad Ingeniería", 15,
-            "https://images.openfoodfacts.org/images/products/007/501/009/9633/front_es.3.400.jpg", "Snacks"))
-
-        listaOriginal.add(Producto("Coca Cola 600ml", "Cooperativa", 3,
-            "https://images.openfoodfacts.org/images/products/005/000/112/8082/front_es.3.400.jpg", "Bebidas"))
-
-        listaOriginal.add(Producto("Café Americano", "Laboratorios", 20,
-            "https://images.openfoodfacts.org/images/products/002/010/006/5502/front_es.3.400.jpg", "Bebidas"))
-
-        listaOriginal.add(Producto("Galletas", "Biblioteca", 10,
-            "https://images.openfoodfacts.org/images/products/007/622/200/2571/front_es.3.400.jpg", "Papelería"))
-
-        listaOriginal.add(Producto("Sándwich", "Cooperativa", 4,
-            "https://images.openfoodfacts.org/images/products/005/449/136/8014/front_es.3.400.jpg", "Comida"))
-
 
         adapter = ProductoAdapter(listaOriginal)
         rvProductos.layoutManager = LinearLayoutManager(this)
         rvProductos.adapter = adapter
 
+        cargarProductos()
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean = false
@@ -54,12 +40,31 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun filtrar(texto: String) {
-        val query = texto.lowercase(Locale.getDefault())
-        val filtrados = listaOriginal.filter {
-            it.nombre.lowercase(Locale.getDefault()).contains(query) ||
-                    it.categoria.lowercase(Locale.getDefault()).contains(query)
-        }
-        adapter.updateList(filtrados)
+    private fun cargarProductos() {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("http://10.0.2.2/android_api/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val service = retrofit.create(ApiService::class.java)
+
+        service.obtenerProductos().enqueue(object : Callback<List<Producto>> {
+            override fun onResponse(call: Call<List<Producto>>, response: Response<List<Producto>>) {
+                if (response.isSuccessful) {
+                    val lista = response.body()
+                    if (lista != null) {
+                        listaOriginal.clear()
+                        listaOriginal.addAll(lista)
+                        adapter.updateList(listaOriginal)
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<List<Producto>>, t: Throwable) {
+                Toast.makeText(this@MainActivity, "Sin conexión al servidor", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
-}
+
+    private fun filtrar(texto: String) {
+        val query = texto.lowercase(Locale.getDefault())}}
