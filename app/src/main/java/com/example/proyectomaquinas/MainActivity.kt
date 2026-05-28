@@ -42,14 +42,17 @@ class MainActivity : AppCompatActivity() {
 
     private fun cargarProductos() {
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2/android_api/")
+            .baseUrl("http://10.0.2.2:5191/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
         val service = retrofit.create(ApiService::class.java)
 
         service.obtenerProductos().enqueue(object : Callback<List<Producto>> {
-            override fun onResponse(call: Call<List<Producto>>, response: Response<List<Producto>>) {
+            override fun onResponse(
+                call: Call<List<Producto>>,
+                response: Response<List<Producto>>
+            ) {
                 if (response.isSuccessful) {
                     val lista = response.body()
                     if (lista != null) {
@@ -61,10 +64,17 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<List<Producto>>, t: Throwable) {
+                android.util.Log.e("ERROR_API", t.message ?: "Error desconocido")
                 Toast.makeText(this@MainActivity, "Sin conexión al servidor", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
     private fun filtrar(texto: String) {
-        val query = texto.lowercase(Locale.getDefault())}}
+        val query = texto.lowercase(Locale.getDefault())
+        val filtrados = listaOriginal.filter {
+            it.nombre.lowercase(Locale.getDefault()).contains(query)
+        }
+        adapter.updateList(filtrados)
+    }
+}

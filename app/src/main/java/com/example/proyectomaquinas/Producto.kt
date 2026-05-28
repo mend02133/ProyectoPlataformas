@@ -1,8 +1,11 @@
 package com.example.proyectomaquinas
 
 data class Producto(
-    val IdProductos: Int,
-    val Nombre: String,
-    val Precio: Double,
-    val Descripcion: String
+    val idProductos: Int,
+    val nombre: String,
+    val precio: Double,
+    val descripcion: String,
+    val ubicacion: String,
+    val estado : String,
+    val cantidad: Int
 )

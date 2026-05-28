@@ -4,6 +4,6 @@ import retrofit2.Call
 import retrofit2.http.GET
 
 interface ApiService {
-    @GET("consultar.php")
+    @GET("api/Productos")
     fun obtenerProductos(): Call<List<Producto>>
 }
